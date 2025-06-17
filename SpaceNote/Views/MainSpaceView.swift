@@ -8,11 +8,24 @@
 import SwiftUI
 
 struct MainSpaceView: View {
+    // 네비게이션 로직 관리
+    @EnvironmentObject var navigationManager: NavigationManager
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack(path: $navigationManager.path) {
+            ZStack {
+                Image("SpaceBackground")
+                    .resizable(resizingMode: .tile)
+                    .ignoresSafeArea()
+                
+            }
+            
+        }
     }
+    
 }
 
 #Preview {
     MainSpaceView()
+        .environmentObject(NavigationManager())
 }
