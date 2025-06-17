@@ -34,9 +34,26 @@
 		270AF8402E018EA700503AB3 /* setup-githooks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "setup-githooks.sh"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		270AF8A12E01D89E00503AB3 /* Exceptions for "SpaceNote" folder in "SpaceNote" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Components/.gitkeep,
+				Extensions/.gitkeep,
+				Models/.gitkeep,
+				Resources/.gitkeep,
+				ViewModels/.gitkeep,
+			);
+			target = 270AF7D52E01626600503AB3 /* SpaceNote */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		270AF7D82E01626600503AB3 /* SpaceNote */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				270AF8A12E01D89E00503AB3 /* Exceptions for "SpaceNote" folder in "SpaceNote" target */,
+			);
 			path = SpaceNote;
 			sourceTree = "<group>";
 		};

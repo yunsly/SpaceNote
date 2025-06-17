@@ -10,10 +10,12 @@ import SwiftData
 
 @main
 struct SpaceNoteApp: App {
+    @StateObject private var navigationManager = NavigationManager()
     
     var body: some Scene {
         WindowGroup {
             MainSpaceView()
+                .environmentObject(navigationManager)
         }
     }
 }
