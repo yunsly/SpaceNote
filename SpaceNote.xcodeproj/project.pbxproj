@@ -60,6 +60,11 @@
 			path = scripts;
 			sourceTree = "<group>";
 		};
+		270AF8462E01BE1200503AB3 /* .github */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = .github;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +95,7 @@
 		270AF7CD2E01626600503AB3 = {
 			isa = PBXGroup;
 			children = (
+				270AF8462E01BE1200503AB3 /* .github */,
 				270AF8392E018B2700503AB3 /* scripts */,
 				270AF8382E018B1000503AB3 /* docs */,
 				270AF7D82E01626600503AB3 /* SpaceNote */,
@@ -129,6 +135,7 @@
 				270AF7D82E01626600503AB3 /* SpaceNote */,
 				270AF8382E018B1000503AB3 /* docs */,
 				270AF8392E018B2700503AB3 /* scripts */,
+				270AF8462E01BE1200503AB3 /* .github */,
 			);
 			name = SpaceNote;
 			packageProductDependencies = (
