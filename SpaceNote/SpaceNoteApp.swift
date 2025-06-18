@@ -10,12 +10,21 @@ import SwiftData
 
 @main
 struct SpaceNoteApp: App {
-    @StateObject private var navigationManager = NavigationManager()
-    
     var body: some Scene {
         WindowGroup {
-            MainSpaceView()
-                .environmentObject(navigationManager)
+            AppEntryPoint()
         }
+        .modelContainer(for: StarPoint.self)
+    }
+}
+
+struct AppEntryPoint: View {
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var navigationManager = NavigationManager()
+
+    var body: some View {
+        let viewModel = StarPointViewModel(modelContext: modelContext)
+        MainSpaceView(viewModel: viewModel)
+            .environmentObject(navigationManager)
     }
 }

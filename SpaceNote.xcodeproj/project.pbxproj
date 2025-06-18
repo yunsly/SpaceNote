@@ -40,7 +40,6 @@
 			membershipExceptions = (
 				Components/.gitkeep,
 				Extensions/.gitkeep,
-				Models/.gitkeep,
 				Resources/.gitkeep,
 				ViewModels/.gitkeep,
 			);
