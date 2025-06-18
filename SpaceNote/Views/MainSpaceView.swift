@@ -12,9 +12,19 @@ struct MainSpaceView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @ObservedObject var viewModel: StarPointViewModel
     
-    // 별 조작
+    // 별 조작 (이동 시 필요한 변수)
     @State private var selectedStar: StarPoint? = nil
+    
+    // 별 메모 디테일 조작 변수
     @State private var isShowingStarDetail = false
+    
+    // 별자리 연결 제어 변수
+    @State private var isConnecting = false
+    @State private var connectedStars: [StarPoint] = []
+    @State private var currentDragPosition: CGPoint? = nil
+    @State private var liveConnections: [(from: StarPoint, to: StarPoint)] = []
+    
+    
     
     var body: some View {
         NavigationStack(path: $navigationManager.path) {
@@ -24,6 +34,29 @@ struct MainSpaceView: View {
                         .resizable(resizingMode: .tile)
                         .ignoresSafeArea()
                     
+                    // 이미 지정된 연결선 그리기
+                    ForEach(viewModel.connections) { connection in
+                        if let from = viewModel.stars.first(where: { $0.id == connection.fromStarID }),
+                           let to = viewModel.stars.first(where: { $0.id == connection.toStarID }) {
+                            Path { path in
+                                path.move(to: from.position)
+                                path.addLine(to: to.position)
+                            }
+                            .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
+                        }
+                    }
+                    
+                    
+                    // 별자리 라이브 연결
+                    ForEach(liveConnections, id: \.from.id) { pair in
+                        Path { path in
+                            path.move(to: pair.from.position)
+                            path.addLine(to: pair.to.position)
+                        }
+                        .stroke(Color.cyan, lineWidth: 2)
+                    }
+                    
+                    // 별 렌더링
                     ForEach(viewModel.stars) { star in
                         GlowingStar(
                             position: star.position,
@@ -33,11 +66,24 @@ struct MainSpaceView: View {
                             },
                             onMove: { newPosition in
                                 viewModel.updatePosition(for: star, to: newPosition)
-                                
-                            }
+                            },
+                            isConnectModeEnabled: isConnecting
                         )
                     }
                     
+                    // 연결 중인 선 그리기 (손가락 위치 따라가기)
+                    if isConnecting,
+                       let start = connectedStars.last,
+                       let drag = currentDragPosition {
+                        
+                        Path { path in
+                            path.move(to: start.position)
+                            path.addLine(to: drag)
+                        }
+                        .stroke(Color.cyan, lineWidth: 2)
+                    }
+                    
+                    // + 버튼
                     VStack {
                         Spacer()
                         HStack {
@@ -55,22 +101,76 @@ struct MainSpaceView: View {
                             
                         }
                     }
-                    
+                    // 기기 흔들림 감지
                     ShakeDetector {
                         viewModel.deleteAllStars()
                     }
                     .allowsHitTesting(false)
                 }
+                // 연결 모드 진입 제스처
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 0.3)
+                        .onEnded { _ in
+                            isConnecting = true
+                            connectedStars = []
+                            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                        }
+                )
+                // 연결 드래그 제스처
+                .gesture(
+                    isConnecting
+                    ? DragGesture()
+                        .onChanged { value in
+                            currentDragPosition = value.location
+                            
+                            // 시작점 지정
+                            if connectedStars.isEmpty {
+                                if let first = viewModel.findStar(near: value.location) {
+                                    connectedStars.append(first)
+                                }
+                                return
+                            }
+                            
+                            // 다음 별 만났을 때 즉시 연결
+                            if let star = viewModel.findStar(near: value.location),
+                               let last = connectedStars.last,
+                               star.id != last.id,
+                               !connectedStars.contains(where: { $0.id == star.id }) {
+                                
+                                connectedStars.append(star)
+                                liveConnections.append((from: last, to: star)) // ⭐️ 즉시 선 추가!
+                                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                            }
+                        }
+                        .onEnded { _ in
+                            for pair in liveConnections {
+                                viewModel.connectStars(start: pair.from, end: pair.to)
+                            }
+                            
+                            isConnecting = false
+                            connectedStars = []
+                            liveConnections = []
+                            currentDragPosition = nil
+                        }
+                    : nil
+                )
+                // 메모 디테일 모달
                 .sheet(isPresented: $isShowingStarDetail) {
                     if let selected = selectedStar {
                         VStack {
-                            Text("⭐️ 별 메모 보기")
+                            Text("⭐️")
                                 .font(.title2)
                                 .padding()
                             
-                            Text("ID: \(selected.id.uuidString)")
+                            Text("Star ID: \(selected.id.uuidString)")
                                 .font(.caption)
                                 .foregroundColor(.gray)
+                            if let constellation = selected.constellationID {
+                                Text("Constellation ID: \(constellation.uuidString)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                            
                             
                             Spacer()
                             Button("닫기") {

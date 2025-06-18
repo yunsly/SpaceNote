@@ -11,47 +11,44 @@ struct GlowingStar: View {
     var position: CGPoint
     var onTap: () -> Void
     var onMove: (CGPoint) -> Void
+    var onDragChanged: ((CGPoint) -> Void)? = nil
+    var isConnectModeEnabled: Bool
+    
 
     @State private var dragOffset: CGSize = .zero
-    @State private var isDragging = false
-    @State private var hasTriggeredHaptic = false
 
     var body: some View {
         Circle()
-            .fill(Color.yellow)
+            .fill(isConnectModeEnabled ? .cyan : .yellow) // 연결모드 시 색상 변경 (선택)
             .frame(width: 14, height: 14)
             .shadow(color: .yellow.opacity(0.8), radius: 6)
+            .contentShape(Rectangle())
+            .frame(width: 44, height: 44)
             .position(x: position.x + dragOffset.width,
                       y: position.y + dragOffset.height)
             .simultaneousGesture(
-                TapGesture()
-                    .onEnded {
-                        onTap()
-                    }
+                TapGesture().onEnded { onTap() }
             )
             .gesture(
-                LongPressGesture(minimumDuration: 0.1)
-                    .sequenced(before: DragGesture())
+                isConnectModeEnabled ? nil :
+                DragGesture()
                     .onChanged { value in
-                        if case .second(true, let drag?) = value {
-                            if !hasTriggeredHaptic {
-                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                hasTriggeredHaptic = true
-                            }
-                            dragOffset = drag.translation
-                        }
+                        dragOffset = value.translation
+                        let newPosition = CGPoint(
+                            x: position.x + value.translation.width,
+                            y: position.y + value.translation.height
+                        )
+                        onDragChanged?(newPosition)
                     }
                     .onEnded { value in
-                        if case .second(true, let drag?) = value {
-                            let newPosition = CGPoint(
-                                x: position.x + drag.translation.width,
-                                y: position.y + drag.translation.height
-                            )
-                            onMove(newPosition)
-                        }
+                        let newPosition = CGPoint(
+                            x: position.x + value.translation.width,
+                            y: position.y + value.translation.height
+                        )
+                        onMove(newPosition)
                         dragOffset = .zero
-                        hasTriggeredHaptic = false
                     }
             )
+        
     }
 }
