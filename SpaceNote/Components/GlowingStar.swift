@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct GlowingStar: View {
-    @State private var isDragging = false
-    @State private var dragOffset: CGSize = .zero
-
     var position: CGPoint
+    var onTap: () -> Void
     var onMove: (CGPoint) -> Void
+
+    @State private var dragOffset: CGSize = .zero
+    @State private var isDragging = false
+    @State private var hasTriggeredHaptic = false
 
     var body: some View {
         Circle()
@@ -21,15 +23,21 @@ struct GlowingStar: View {
             .shadow(color: .yellow.opacity(0.8), radius: 6)
             .position(x: position.x + dragOffset.width,
                       y: position.y + dragOffset.height)
-            .gesture(
-                LongPressGesture(minimumDuration: 0.3)
-                    .onEnded { _ in
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        isDragging = true
+            .simultaneousGesture(
+                TapGesture()
+                    .onEnded {
+                        onTap()
                     }
+            )
+            .gesture(
+                LongPressGesture(minimumDuration: 0.1)
                     .sequenced(before: DragGesture())
                     .onChanged { value in
                         if case .second(true, let drag?) = value {
+                            if !hasTriggeredHaptic {
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                hasTriggeredHaptic = true
+                            }
                             dragOffset = drag.translation
                         }
                     }
@@ -42,7 +50,7 @@ struct GlowingStar: View {
                             onMove(newPosition)
                         }
                         dragOffset = .zero
-                        isDragging = false
+                        hasTriggeredHaptic = false
                     }
             )
     }

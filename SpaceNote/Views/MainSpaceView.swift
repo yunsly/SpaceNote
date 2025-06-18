@@ -12,6 +12,10 @@ struct MainSpaceView: View {
     @EnvironmentObject var navigationManager: NavigationManager
     @ObservedObject var viewModel: StarPointViewModel
     
+    // 별 조작
+    @State private var selectedStar: StarPoint? = nil
+    @State private var isShowingStarDetail = false
+    
     var body: some View {
         NavigationStack(path: $navigationManager.path) {
             GeometryReader { geometry in
@@ -21,9 +25,17 @@ struct MainSpaceView: View {
                         .ignoresSafeArea()
                     
                     ForEach(viewModel.stars) { star in
-                        GlowingStar(position: star.position) { newPosition in
-                            viewModel.updatePosition(for: star, to: newPosition)
-                        }
+                        GlowingStar(
+                            position: star.position,
+                            onTap: {
+                                selectedStar = star
+                                isShowingStarDetail = true
+                            },
+                            onMove: { newPosition in
+                                viewModel.updatePosition(for: star, to: newPosition)
+                                
+                            }
+                        )
                     }
                     
                     VStack {
@@ -48,6 +60,26 @@ struct MainSpaceView: View {
                         viewModel.deleteAllStars()
                     }
                     .allowsHitTesting(false)
+                }
+                .sheet(isPresented: $isShowingStarDetail) {
+                    if let selected = selectedStar {
+                        VStack {
+                            Text("⭐️ 별 메모 보기")
+                                .font(.title2)
+                                .padding()
+                            
+                            Text("ID: \(selected.id.uuidString)")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            Spacer()
+                            Button("닫기") {
+                                isShowingStarDetail = false
+                            }
+                            .padding()
+                        }
+                        .presentationDetents([.fraction(0.3)])
+                    }
                 }
             }
             
