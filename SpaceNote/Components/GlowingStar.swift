@@ -14,7 +14,6 @@ struct GlowingStar: View {
     var onDragChanged: ((CGPoint) -> Void)? = nil
     var isConnectModeEnabled: Bool
     
-
     @State private var dragOffset: CGSize = .zero
 
     var body: some View {

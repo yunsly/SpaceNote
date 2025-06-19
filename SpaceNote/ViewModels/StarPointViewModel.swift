@@ -18,7 +18,7 @@ class StarPointViewModel: ObservableObject {
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         fetchStars()
-        fetchConnections() 
+        fetchConnections()
     }
     
     // 별 목록 조회

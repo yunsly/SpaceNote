@@ -40,7 +40,6 @@
 			membershipExceptions = (
 				Extensions/.gitkeep,
 				Resources/.gitkeep,
-				ViewModels/.gitkeep,
 			);
 			target = 270AF7D52E01626600503AB3 /* SpaceNote */;
 		};
