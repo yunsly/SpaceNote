@@ -14,6 +14,7 @@ final class StarPoint: Identifiable {
     var x: Double
     var y: Double
     
+    // 위치 정보
     var position: CGPoint {
         get { CGPoint(x: x, y: y) }
         set {
@@ -22,9 +23,13 @@ final class StarPoint: Identifiable {
         }
     }
     
-    init(id: UUID = UUID(), position: CGPoint) {
+    // 소속된 별자리
+    var constellationID: UUID?
+    
+    init(id: UUID = UUID(), position: CGPoint, constellationID: UUID? = nil) {
         self.id = id
         self.x = position.x
         self.y = position.y
+        self.constellationID = constellationID
     }
 }

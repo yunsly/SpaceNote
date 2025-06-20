@@ -38,10 +38,8 @@
 		270AF8A12E01D89E00503AB3 /* Exceptions for "SpaceNote" folder in "SpaceNote" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Components/.gitkeep,
 				Extensions/.gitkeep,
 				Resources/.gitkeep,
-				ViewModels/.gitkeep,
 			);
 			target = 270AF7D52E01626600503AB3 /* SpaceNote */;
 		};

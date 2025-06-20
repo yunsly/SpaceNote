@@ -11,12 +11,14 @@ import SwiftData
 @MainActor
 class StarPointViewModel: ObservableObject {
     @Published var stars: [StarPoint] = []
+    @Published var connections: [StarConnection] = []
     
     let modelContext: ModelContext
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         fetchStars()
+        fetchConnections()
     }
     
     // 별 목록 조회
@@ -24,6 +26,14 @@ class StarPointViewModel: ObservableObject {
         let descriptor = FetchDescriptor<StarPoint>()
         if let result = try? modelContext.fetch(descriptor) {
             stars = result
+        }
+    }
+    
+    // 별자리 연결 리스트 조회
+    func fetchConnections() {
+        let descriptor = FetchDescriptor<StarConnection>()
+        if let result = try? modelContext.fetch(descriptor) {
+            connections = result
         }
     }
     
@@ -53,4 +63,28 @@ class StarPointViewModel: ObservableObject {
         try? modelContext.save()
         stars.removeAll()
     }
+    
+    // 터치가 닿은 영역의 주변 별 찾기
+    func findStar(near position: CGPoint, threshold: CGFloat = 24) -> StarPoint? {
+        stars.first {
+            hypot($0.position.x - position.x, $0.position.y - position.y) < threshold
+        }
+    }
+    
+    // 별 연결하기
+    func connectStars(start: StarPoint, end: StarPoint) {
+        // 중복 연결 방지
+        let alreadyConnected = connections.contains {
+            ($0.fromStarID == start.id && $0.toStarID == end.id) ||
+            ($0.fromStarID == end.id && $0.toStarID == start.id)
+        }
+
+        guard !alreadyConnected else { return }
+
+        let connection = StarConnection(from: start.id, to: end.id)
+        modelContext.insert(connection)
+        try? modelContext.save()
+        connections.append(connection)
+    }
+
 }
