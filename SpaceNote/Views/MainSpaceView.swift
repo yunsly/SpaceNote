@@ -26,10 +26,11 @@ struct MainSpaceView: View {
     @State private var currentDragPosition: CGPoint? = nil
     @State private var liveConnections: [(from: StarPoint, to: StarPoint)] = []
     @State private var tempPositions: [UUID: CGPoint] = [:]
-
     
+    // 탭 이동
+    @State private var selectedTab: Int = 0
 
-    
+
     var body: some View {
         NavigationStack(path: $navigationManager.path) {
             GeometryReader { geometry in
@@ -100,11 +101,29 @@ struct MainSpaceView: View {
                     }
 
                     
-                    // + 버튼
+                    // 하단부 ( + 버튼, 탭바)
                     VStack {
                         Spacer()
                         HStack {
+                            Button(action: {
+                                // 리스트 뷰
+                            }) {
+                                Image(systemName: "line.3.horizontal")
+                                    .font(.title)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Circle()
+                                        .fill(Color.clear)
+                                        .stroke(Color.gray))
+                            }
+                            .padding()
                             Spacer()
+                            
+                            // 하단 탭바
+                            TabBarView(selectedTab: $selectedTab)
+                            Spacer()
+                            
+                            // + 버튼
                             Button(action: {
                                 viewModel.addRandomStar(in: geometry.size)
                             }) {
@@ -112,27 +131,37 @@ struct MainSpaceView: View {
                                     .font(.title)
                                     .foregroundColor(.white)
                                     .padding()
-                                    .background(Circle().fill(Color.blue))
+                                    .background(Circle()
+                                        .fill(Color.clear)
+                                        .stroke(Color.gray))
                             }
                             .padding()
                             
                         }
                     }
+                    
+                    
+                    
+                    
                     // 기기 흔들림 감지
                     ShakeDetector {
                         viewModel.deleteAllStars()
                     }
                     .allowsHitTesting(false)
+                    
+                    
                 }
-                // 연결 모드 진입 제스처
-                .simultaneousGesture(
-                    LongPressGesture(minimumDuration: 0.3)
-                        .onEnded { _ in
-                            isConnecting = true
-                            connectedStars = []
-                            UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-                        }
-                )
+                .onChange(of: selectedTab) { newValue in
+                    if newValue == 1 {
+                        // 편집 모드(연결 모드) 자동 진입
+                        isConnecting = true
+                        connectedStars = []
+                        liveConnections = []
+                    } else {
+                        isConnecting = false
+                    }
+                }
+
                 // 연결 드래그 제스처
                 .gesture(
                     isConnecting
