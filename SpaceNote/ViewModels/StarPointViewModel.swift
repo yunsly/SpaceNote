@@ -72,8 +72,7 @@ class StarPointViewModel: ObservableObject {
     }
     
     // 별 연결하기
-    func connectStars(start: StarPoint, end: StarPoint) {
-        // 중복 연결 방지
+    func connectStars(start: StarPoint, end: StarPoint, constellationID: UUID) {
         let alreadyConnected = connections.contains {
             ($0.fromStarID == start.id && $0.toStarID == end.id) ||
             ($0.fromStarID == end.id && $0.toStarID == start.id)
@@ -81,10 +80,16 @@ class StarPointViewModel: ObservableObject {
 
         guard !alreadyConnected else { return }
 
-        let connection = StarConnection(from: start.id, to: end.id)
+        let connection = StarConnection(from: start.id, to: end.id, constellationID: constellationID)
         modelContext.insert(connection)
+
+        // 별도 소속 설정 (중복 방지 로직은 필요 시 추가 가능)
+        start.constellationID = constellationID
+        end.constellationID = constellationID
+
         try? modelContext.save()
         connections.append(connection)
     }
+
 
 }
