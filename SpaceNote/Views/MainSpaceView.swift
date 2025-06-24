@@ -16,7 +16,6 @@ struct MainSpaceView: View {
     @State private var draggingStarID: UUID? = nil
     
     
-    
     // 별 메모 디테일 조작 변수
     @State private var selectedStar: StarPoint? = nil
     @State private var isShowingStarDetail = false
@@ -108,39 +107,41 @@ struct MainSpaceView: View {
                     VStack {
                         Spacer()
                         BottomButtonBarView(viewModel: viewModel)
-//                        HStack {
-//                            Button(action: {
-//                                // 리스트 뷰
-//                            }) {
-//                                Image(systemName: "line.3.horizontal")
-//                                    .font(.title)
-//                                    .foregroundColor(.white)
-//                            }
-//                            .frame(width: 60.0, height: 60.0)
-////                            .buttonStyle(.glass)
-//                            .glassEffect(.regular.interactive())
-//                            Spacer()
-//                            
-//                            // 하단 탭바
-//                            TabBarView2(selectedTab: $selectedTab)
-//                            Spacer()
-//                            
-//                            // + 버튼
-//                            PlusButtonView()
-////                            Button(action: {
-////                                viewModel.addRandomStar(in: geometry.size)
-////                            }) {
-////                                Image("Plus")
-////                            }
-//////                            .buttonStyle(.glass)
-////                            .frame(width: 60.0, height: 60.0)
-//////                            .font(.system(size: 36))
-////                            .glassEffect(.regular.tint(.purple.opacity(0.5)).interactive())
-////                            
-//                            
-//                        }
-//                        .frame(maxWidth: .infinity)
-//                        .padding(.horizontal, 24)
+//                         HStack {
+//                             Button(action: {
+//                                 // 리스트 뷰
+//                             }) {
+//                                 Image(systemName: "line.3.horizontal")
+//                                     .font(.title)
+//                                     .foregroundColor(.white)
+//                                     .padding()
+//                                     .background(Circle()
+//                                         .fill(Color.clear)
+//                                         .stroke(Color.gray))
+//                             }
+//                             .padding()
+//                             Spacer()
+                            
+//                             // 하단 탭바
+//                             TabBarView(selectedTab: $selectedTab)
+//                             Spacer()
+                            
+//                             // + 버튼
+//                             Button(action: {
+//                                 viewModel.addRandomStar(in: geometry.size)
+//                                 selectedTab = 0
+//                             }) {
+//                                 Image(systemName: "plus")
+//                                     .font(.title)
+//                                     .foregroundColor(.white)
+//                                     .padding()
+//                                     .background(Circle()
+//                                         .fill(Color.clear)
+//                                         .stroke(Color.gray))
+//                             }
+//                             .padding()
+                            
+//                         }
                     }
                     
                     
@@ -180,26 +181,56 @@ struct MainSpaceView: View {
                                 return
                             }
                             
-                            // 다음 별 만났을 때 즉시 연결
+                            // 다음 별 만났을 때 즉시 연결 (중복 허용)
                             if let star = viewModel.findStar(near: value.location),
                                let last = connectedStars.last,
                                star.id != last.id,
-                               !connectedStars.contains(where: { $0.id == star.id }) {
-                                
+                               (
+                                // 처음 별은 다시 연결 허용
+                                star.id == connectedStars.first?.id ||
+                                // 그 외는 중복 방지
+                                !connectedStars.contains(where: { $0.id == star.id })
+                               )
+                            {
                                 connectedStars.append(star)
                                 liveConnections.append((from: last, to: star))
                                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                             }
                         }
                         .onEnded { _ in
+                            // 현재 연결된 별들 중 기존 constellationID가 있는 경우 추출
+                            let existingConstellationID = connectedStars
+                                .compactMap { $0.constellationID }
+                                .first
+                            
+                            // 없으면 새로 생성
+                            let constellationID = existingConstellationID ?? UUID()
+                            
+                            // 연결 생성
                             for pair in liveConnections {
-                                viewModel.connectStars(start: pair.from, end: pair.to)
+                                viewModel.connectStars(
+                                    start: pair.from,
+                                    end: pair.to,
+                                    constellationID: constellationID
+                                )
+                            }
+                            //                            for pair in liveConnections {
+                            //                                viewModel.connectStars(start: pair.from, end: pair.to)
+                            //                            }
+                            
+                            // 별들도 일괄적으로 같은 별자리에 포함시킴
+                            for star in connectedStars {
+                                star.constellationID = constellationID
                             }
                             
+                            try? viewModel.modelContext.save()
+                            
+                            // 상태 초기화
                             isConnecting = false
                             connectedStars = []
                             liveConnections = []
                             currentDragPosition = nil
+                            selectedTab = 0
                         }
                     : nil
                 )
