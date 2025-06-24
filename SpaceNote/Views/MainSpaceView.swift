@@ -14,7 +14,8 @@ struct MainSpaceView: View {
     
     // 별 조작 (이동 시 필요한 변수)
     @State private var draggingStarID: UUID? = nil
-
+    
+    
     
     // 별 메모 디테일 조작 변수
     @State private var selectedStar: StarPoint? = nil
@@ -29,14 +30,16 @@ struct MainSpaceView: View {
     
     // 탭 이동
     @State private var selectedTab: Int = 0
-
-
+    
+    
     var body: some View {
         NavigationStack(path: $navigationManager.path) {
             GeometryReader { geometry in
                 ZStack {
                     Image("SpaceBackground")
-                        .resizable(resizingMode: .tile)
+                        .resizable()
+//                        .scaledToFill()
+//                        .resizable(resizingMode: .tile)
                         .ignoresSafeArea()
                     
                     // 항상 실시간 좌표를 우선 반영해서 연결선을 그림
@@ -47,7 +50,7 @@ struct MainSpaceView: View {
                             // tempPositions에 있으면 그걸 먼저 사용
                             let fromPos = tempPositions[connection.fromStarID] ?? from.position
                             let toPos = tempPositions[connection.toStarID] ?? to.position
-
+                            
                             Path { path in
                                 path.move(to: fromPos)
                                 path.addLine(to: toPos)
@@ -99,45 +102,45 @@ struct MainSpaceView: View {
                         }
                         .stroke(Color.cyan, lineWidth: 2)
                     }
-
+                    
                     
                     // 하단부 ( + 버튼, 탭바)
                     VStack {
                         Spacer()
-                        HStack {
-                            Button(action: {
-                                // 리스트 뷰
-                            }) {
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.title)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .background(Circle()
-                                        .fill(Color.clear)
-                                        .stroke(Color.gray))
-                            }
-                            .padding()
-                            Spacer()
-                            
-                            // 하단 탭바
-                            TabBarView(selectedTab: $selectedTab)
-                            Spacer()
-                            
-                            // + 버튼
-                            Button(action: {
-                                viewModel.addRandomStar(in: geometry.size)
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.title)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .background(Circle()
-                                        .fill(Color.clear)
-                                        .stroke(Color.gray))
-                            }
-                            .padding()
-                            
-                        }
+                        BottomButtonBarView(viewModel: viewModel)
+//                        HStack {
+//                            Button(action: {
+//                                // 리스트 뷰
+//                            }) {
+//                                Image(systemName: "line.3.horizontal")
+//                                    .font(.title)
+//                                    .foregroundColor(.white)
+//                            }
+//                            .frame(width: 60.0, height: 60.0)
+////                            .buttonStyle(.glass)
+//                            .glassEffect(.regular.interactive())
+//                            Spacer()
+//                            
+//                            // 하단 탭바
+//                            TabBarView2(selectedTab: $selectedTab)
+//                            Spacer()
+//                            
+//                            // + 버튼
+//                            PlusButtonView()
+////                            Button(action: {
+////                                viewModel.addRandomStar(in: geometry.size)
+////                            }) {
+////                                Image("Plus")
+////                            }
+//////                            .buttonStyle(.glass)
+////                            .frame(width: 60.0, height: 60.0)
+//////                            .font(.system(size: 36))
+////                            .glassEffect(.regular.tint(.purple.opacity(0.5)).interactive())
+////                            
+//                            
+//                        }
+//                        .frame(maxWidth: .infinity)
+//                        .padding(.horizontal, 24)
                     }
                     
                     
@@ -161,7 +164,7 @@ struct MainSpaceView: View {
                         isConnecting = false
                     }
                 }
-
+                
                 // 연결 드래그 제스처
                 .gesture(
                     isConnecting
@@ -233,3 +236,4 @@ struct MainSpaceView: View {
     }
     
 }
+
