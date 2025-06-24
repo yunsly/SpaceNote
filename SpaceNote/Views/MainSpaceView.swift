@@ -36,7 +36,9 @@ struct MainSpaceView: View {
             GeometryReader { geometry in
                 ZStack {
                     Image("SpaceBackground")
-                        .resizable(resizingMode: .tile)
+                        .resizable()
+//                        .scaledToFill()
+//                        .resizable(resizingMode: .tile)
                         .ignoresSafeArea()
                     
                     // 항상 실시간 좌표를 우선 반영해서 연결선을 그림
@@ -104,41 +106,42 @@ struct MainSpaceView: View {
                     // 하단부 ( + 버튼, 탭바)
                     VStack {
                         Spacer()
-                        HStack {
-                            Button(action: {
-                                // 리스트 뷰
-                            }) {
-                                Image(systemName: "line.3.horizontal")
-                                    .font(.title)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .background(Circle()
-                                        .fill(Color.clear)
-                                        .stroke(Color.gray))
-                            }
-                            .padding()
-                            Spacer()
+                        BottomButtonBarView(viewModel: viewModel)
+//                         HStack {
+//                             Button(action: {
+//                                 // 리스트 뷰
+//                             }) {
+//                                 Image(systemName: "line.3.horizontal")
+//                                     .font(.title)
+//                                     .foregroundColor(.white)
+//                                     .padding()
+//                                     .background(Circle()
+//                                         .fill(Color.clear)
+//                                         .stroke(Color.gray))
+//                             }
+//                             .padding()
+//                             Spacer()
                             
-                            // 하단 탭바
-                            TabBarView(selectedTab: $selectedTab)
-                            Spacer()
+//                             // 하단 탭바
+//                             TabBarView(selectedTab: $selectedTab)
+//                             Spacer()
                             
-                            // + 버튼
-                            Button(action: {
-                                viewModel.addRandomStar(in: geometry.size)
-                                selectedTab = 0
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.title)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .background(Circle()
-                                        .fill(Color.clear)
-                                        .stroke(Color.gray))
-                            }
-                            .padding()
+//                             // + 버튼
+//                             Button(action: {
+//                                 viewModel.addRandomStar(in: geometry.size)
+//                                 selectedTab = 0
+//                             }) {
+//                                 Image(systemName: "plus")
+//                                     .font(.title)
+//                                     .foregroundColor(.white)
+//                                     .padding()
+//                                     .background(Circle()
+//                                         .fill(Color.clear)
+//                                         .stroke(Color.gray))
+//                             }
+//                             .padding()
                             
-                        }
+//                         }
                     }
                     
                     
@@ -264,3 +267,4 @@ struct MainSpaceView: View {
     }
     
 }
+
