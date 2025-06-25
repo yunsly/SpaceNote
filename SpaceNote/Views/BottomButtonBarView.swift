@@ -17,6 +17,9 @@ struct BottomButtonBarView: View {
     @Namespace private var namespace
     @Namespace private var plusButtonNamespace
     
+    @Binding var scale: CGFloat
+    @Binding var offset: CGSize
+    
     var body: some View {
         GeometryReader { geometry in
             GlassEffectContainer {
@@ -38,14 +41,14 @@ struct BottomButtonBarView: View {
                         TextField(
                             text: $content,
                             prompt: Text("내용을 입력하세요")
-                            ) {
-                            }
-                            .foregroundColor(.white)
-                            .frame(height: 300)
-                            .font(.system(size: 20))
-                            .padding()
-                            .glassEffect(.regular.tint(.white.opacity(0.2)), in: .rect(cornerRadius: 30.0))
-                            .glassEffectID("content", in: plusButtonNamespace)
+                        ) {
+                        }
+                        .foregroundColor(.white)
+                        .frame(height: 300)
+                        .font(.system(size: 20))
+                        .padding()
+                        .glassEffect(.regular.tint(.white.opacity(0.2)), in: .rect(cornerRadius: 30.0))
+                        .glassEffectID("content", in: plusButtonNamespace)
                         
                         HStack{
                             Button(action: {
@@ -63,8 +66,9 @@ struct BottomButtonBarView: View {
                             .glassEffect(.regular.interactive())
                             .glassEffectID("0", in: namespace)
                             
+                            
                             Button(action: {
-                                viewModel.addRandomStar(in: geometry.size)
+                                viewModel.addRandomStar(in: geometry.size, scale: scale, offset: offset)
                                 withAnimation {
                                     isExpanded.toggle()
                                     isRemove = true
@@ -126,7 +130,7 @@ struct BottomButtonBarView: View {
                             .frame(width: 60.0, height: 60.0)
                             .glassEffect(.regular.tint(.purple.opacity(0.5)).interactive())
                             .glassEffectID("1", in: namespace)
-//                        .glassEffectID("3", in: namespace)
+                            //                        .glassEffectID("3", in: namespace)
                             .glassEffectUnion(id: "1", namespace: namespace)
                             
                             
