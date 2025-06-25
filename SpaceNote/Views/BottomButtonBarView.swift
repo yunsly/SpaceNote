@@ -113,6 +113,7 @@ struct BottomButtonBarView: View {
                                 Image(systemName: "line.3.horizontal")
                                     .font(.title)
                                     .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.5), radius: 4, x: 2, y: 2)
                             }
                             .frame(width: 60.0, height: 60.0)
                             .glassEffect(.regular.interactive())
@@ -132,6 +133,7 @@ struct BottomButtonBarView: View {
                                 Image(systemName: "sparkles")
                                     .font(.title)
                                     .foregroundColor(.white)
+                                    .shadow(color: .black.opacity(0.5), radius: 4, x: 2, y: 2)
                             }
                             .frame(width: 60.0, height: 60.0)
                             //                .buttonStyle(.glass)
@@ -149,6 +151,7 @@ struct BottomButtonBarView: View {
                                 }
                             }) {
                                 Image("Plus")
+                                    .shadow(color: .black.opacity(0.5), radius: 4, x: 2, y: 2)
                             }
                             .frame(width: 60.0, height: 60.0)
                             .glassEffect(.regular.tint(.purple.opacity(0.5)).interactive())
