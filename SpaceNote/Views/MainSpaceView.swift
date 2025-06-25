@@ -106,7 +106,7 @@ struct MainSpaceView: View {
                     // 하단부 ( + 버튼, 탭바)
                     VStack {
                         Spacer()
-                        BottomButtonBarView(viewModel: viewModel)
+                        BottomButtonBarView(viewModel: viewModel, selectedTab: $selectedTab)
 //                         HStack {
 //                             Button(action: {
 //                                 // 리스트 뷰
@@ -226,17 +226,17 @@ struct MainSpaceView: View {
                             try? viewModel.modelContext.save()
                             
                             // 상태 초기화
-                            isConnecting = false
                             connectedStars = []
                             liveConnections = []
                             currentDragPosition = nil
-                            selectedTab = 0
+//                          isConnecting = false
+//                          selectedTab = 0
                         }
                     : nil
                 )
                 // 메모 디테일 모달
                 .sheet(isPresented: $isShowingStarDetail) {
-                    if let selected = selectedStar {
+                    if let selected = selectedStar { 
                         VStack {
                             Text("⭐️")
                                 .font(.title2)

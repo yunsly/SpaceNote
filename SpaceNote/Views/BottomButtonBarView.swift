@@ -9,8 +9,11 @@ import SwiftUI
 
 struct BottomButtonBarView: View {
     @ObservedObject var viewModel: StarPointViewModel
+    @Binding var selectedTab: Int
+    
     @State private var isRemove: Bool = true
     @State private var isExpanded: Bool = false
+    @State private var isEdit: Bool = false
     
     @State private var title: String = ""
     @State private var content: String = ""
@@ -83,10 +86,29 @@ struct BottomButtonBarView: View {
                     }
                     HStack {
                         
+                        if isEdit {
+                            //확인 버튼
+                            Button(action: {
+                                selectedTab = 0
+                                withAnimation {
+                                    isEdit = false
+                                    isRemove = true
+                                }
+                            }) {
+                                Text("확인")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(width: 200.0, height: 60.0)
+                            .glassEffect(.regular.interactive())
+                            .glassEffectID("plusButton", in: plusButtonNamespace)
+                            .glassEffectUnion(id: "0", namespace: namespace)
+
+                        }
+                        
                         if isRemove {
                             //리스트 버튼
                             Button(action: {
-                                // 리스트 뷰
                             }) {
                                 Image(systemName: "line.3.horizontal")
                                     .font(.title)
@@ -101,6 +123,11 @@ struct BottomButtonBarView: View {
                             
                             //에딧 버튼
                             Button(action: {
+                                selectedTab = 1
+                                withAnimation {
+                                    isEdit = true
+                                    isRemove = false
+                                }
                             }) {
                                 Image(systemName: "sparkles")
                                     .font(.title)
