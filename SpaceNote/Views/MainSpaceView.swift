@@ -105,16 +105,18 @@ struct MainSpaceView: View {
                             for star in connectedStars {
                                 star.constellationID = constellationID
                             }
-                            try? viewModel.modelContext.save()
-
+                            try? viewModel.modelContext.save()                 
+                            // 상태 초기화
                             connectedStars = []
                             liveConnections = []
                             currentDragPosition = nil
+//                          isConnecting = false
+//                          selectedTab = 0
                         }
                     : nil
                 )
                 .sheet(isPresented: $isShowingStarDetail) {
-                    if let selected = selectedStar {
+                    if let selected = selectedStar { 
                         VStack {
                             Text("⭐️").font(.title2).padding()
                             Text("Star ID: \(selected.id.uuidString)").font(.caption).foregroundColor(.gray)
