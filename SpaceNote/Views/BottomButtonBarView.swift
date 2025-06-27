@@ -10,7 +10,10 @@ import SwiftUI
 struct BottomButtonBarView: View {
     @ObservedObject var viewModel: StarPointViewModel
     @Binding var selectedTab: Int
-    
+
+    @Binding var scale: CGFloat
+    @Binding var offset: CGSize
+  
     @State private var isRemove: Bool = true
     @State private var isExpanded: Bool = false
     @State private var isEdit: Bool = false
@@ -67,7 +70,7 @@ struct BottomButtonBarView: View {
                             .glassEffectID("0", in: namespace)
                             
                             Button(action: {
-                                viewModel.addRandomStar(in: geometry.size)
+                                viewModel.addRandomStar(in: geometry.size, scale: scale, offset: offset)
                                 withAnimation {
                                     isExpanded.toggle()
                                     isRemove = true
