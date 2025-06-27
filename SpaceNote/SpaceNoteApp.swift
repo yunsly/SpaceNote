@@ -14,7 +14,7 @@ struct SpaceNoteApp: App {
         WindowGroup {
             AppEntryPoint()
         }
-        //.modelContainer(for: [StarPoint.self, StarConnection.self, Constellation.self])
+        .modelContainer(for: [StarPoint.self, StarConnection.self, Constellation.self])
     }
 }
 

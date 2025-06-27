@@ -5,12 +5,21 @@
 //  Created by yunsly on 6/24/25.
 //
 
+// ✅ ConstellationView.swift (리팩토링 버전)
+// - 별 관련 제스처, UI 담당
+// - 화면 이동 제어 제거
+// - ⭐️ onStarTap 콜백으로 별 탭 시 외부 처리 가능
+
 import SwiftUI
 
 struct ConstellationView: View {
     @ObservedObject var viewModel: StarPointViewModel
     let scale: CGFloat
     let offset: CGSize
+    @Binding var isTouchNearStar: Bool
+
+    // ⭐️ 외부에서 별 탭 처리할 수 있도록 콜백 추가
+    var onStarTap: (StarPoint) -> Void = { _ in }
 
     var body: some View {
         ZStack {
@@ -37,19 +46,27 @@ struct ConstellationView: View {
                     position: position,
                     scale: scale,
                     onTap: {
-                        // TODO: 선택 처리
+                        onStarTap(star) // ✅ 외부로 전달
                     },
                     onMove: { newPos in
+                        // 별 이동 처리: 우주 좌표로 환산 후 업데이트
                         let spaceX = (newPos.x - offset.width) / scale
                         let spaceY = (newPos.y - offset.height) / scale
                         viewModel.updatePosition(for: star, to: CGPoint(x: spaceX, y: spaceY))
                     },
-                    onDragChanged: { dragPos in
-                        // TODO: 드래그 중 처리
-                    },
+                    onDragChanged: { _ in },
                     isConnectModeEnabled: false
                 )
             }
+        }
+    }
+
+    // 🔍 주변 별 감지 (별 근처에서 제스처 작동 판단용)
+    func checkIfNearStar(_ screenLocation: CGPoint) -> Bool {
+        viewModel.stars.contains { star in
+            let screenPos = star.position.applying(scale: scale, offset: offset)
+            let distance = hypot(screenLocation.x - screenPos.x, screenLocation.y - screenPos.y)
+            return distance < 30
         }
     }
 }
