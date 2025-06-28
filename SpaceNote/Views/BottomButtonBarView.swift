@@ -10,10 +10,13 @@ import SwiftUI
 struct BottomButtonBarView: View {
     @ObservedObject var viewModel: StarPointViewModel
     @Binding var selectedTab: Int
-    
+
+    @Binding var scale: CGFloat
+    @Binding var offset: CGSize
+    @Binding var isConnecting: Bool
+  
     @State private var isRemove: Bool = true
     @State private var isExpanded: Bool = false
-    @State private var isEdit: Bool = false
     @State private var isOpenList: Bool = false
     
     @State private var title: String = ""
@@ -54,7 +57,8 @@ struct BottomButtonBarView: View {
                             }
                         }
                     }
-                    if isExpanded {
+                    
+                  Expanded {
                         
                         TextField(
                             text: $title,
@@ -104,7 +108,10 @@ struct BottomButtonBarView: View {
                             Button(action: {
                                 guard !isAnimating else { return }
                                 isAnimating = true
-                                viewModel.addRandomStar(in: geometry.size)
+                                viewModel.addRandomStar(in: geometry.size, scale: scale, offset: offset, title: title, content: content)
+                                title = ""
+                                content = ""
+
                                 withAnimation {
                                     isExpanded.toggle()
                                     isRemove = true
@@ -127,14 +134,14 @@ struct BottomButtonBarView: View {
                     }
                     HStack {
                         
-                        if isEdit {
+                        if isConnecting {
                             //확인 버튼
                             Button(action: {
                                 guard !isAnimating else { return }
                                 isAnimating = true
                                 selectedTab = 0
                                 withAnimation {
-                                    isEdit = false
+                                    isConnecting = false
                                     isRemove = true
                                 }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
@@ -149,9 +156,8 @@ struct BottomButtonBarView: View {
                             .glassEffect(.regular.interactive())
                             .glassEffectID("0", in: editButton)
                             .disabled(isAnimating)
-                        }
-                        
-                        if isRemove {
+                       
+                        } else if isRemove {
                             //리스트 버튼
                             Button(action: {
                                 guard !isAnimating else { return }
@@ -183,7 +189,7 @@ struct BottomButtonBarView: View {
                                 isAnimating = true
                                 selectedTab = 1
                                 withAnimation {
-                                    isEdit = true
+                                    isConnecting = true
                                     isRemove = false
                                 }
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
