@@ -27,10 +27,6 @@ final class StarPoint: Identifiable {
         }
     }
     
-    // 타이틀 및 내용
-    var title: String
-    var content: String
-    
     // 소속된 별자리
     var constellationID: UUID?
     

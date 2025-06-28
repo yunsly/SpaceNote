@@ -73,15 +73,15 @@ struct MainSpaceView: View {
                     }
                 }
                 .sheet(isPresented: $isShowingStarDetail) {
-                    if let selected = selectedStar { 
+                    if let selected = selectedStar {
                         VStack {
-                            Text(selected.title)
+                            Text(selected.title ?? "")
                                 .font(.title2)
                                 .padding()
-                            Text(selected.content)
+                            Text(selected.content ?? "")
                                 .font(.title3)
                                 .padding()
-                            
+
                             Text("Star ID: \(selected.id.uuidString)").font(.caption).foregroundColor(.gray)
                             if let constellation = selected.constellationID {
                                 Text("Constellation ID: \(constellation.uuidString)").font(.caption).foregroundColor(.gray)
@@ -96,4 +96,3 @@ struct MainSpaceView: View {
         }
     }
 }
-

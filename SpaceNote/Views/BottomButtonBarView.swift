@@ -58,7 +58,7 @@ struct BottomButtonBarView: View {
                         }
                     }
                     
-                  Expanded {
+                  if isExpanded {
                         
                         TextField(
                             text: $title,
