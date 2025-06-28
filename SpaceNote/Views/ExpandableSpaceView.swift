@@ -17,6 +17,7 @@ struct ExpandableSpaceView: View {
     @ObservedObject var viewModel: StarPointViewModel
     @Binding var scale: CGFloat
     @Binding var offset: CGSize
+    @Binding var isConnecting: Bool
 
     @State private var lastScale: CGFloat = 1.0
     @State private var lastOffset: CGSize = .zero
@@ -40,6 +41,7 @@ struct ExpandableSpaceView: View {
                     offset: offset
                 )
                 .gesture( // ✅ 화면 이동 전용 제스처
+                    isConnecting ? nil :
                     DragGesture()
                         .onChanged { value in
                             offset = CGSize(
@@ -58,10 +60,12 @@ struct ExpandableSpaceView: View {
                     scale: scale,
                     offset: offset,
                     isTouchNearStar: $isTouchNearStar,
+                    isConnecting: $isConnecting,
                     onStarTap: onStarTap // ✅ 전달
                 )
             }
             .gesture( // ✅ 확대/축소는 전체에 적용
+                isConnecting ? nil :
                 MagnificationGesture()
                     .onChanged { value in
                         let newScale = min(max(lastScale * value, 0.5), 4.0)

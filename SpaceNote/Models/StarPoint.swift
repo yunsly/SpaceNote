@@ -23,13 +23,19 @@ final class StarPoint: Identifiable {
         }
     }
     
+    // 타이틀 및 내용
+    var title: String
+    var content: String
+    
     // 소속된 별자리
     var constellationID: UUID?
     
-    init(id: UUID = UUID(), position: CGPoint, constellationID: UUID? = nil) {
+    init(id: UUID = UUID(), position: CGPoint, constellationID: UUID? = nil, title: String, content: String) {
         self.id = id
         self.x = position.x
         self.y = position.y
         self.constellationID = constellationID
+        self.title = title
+        self.content = content
     }
 }

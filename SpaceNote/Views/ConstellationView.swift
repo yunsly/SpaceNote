@@ -12,33 +12,59 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct ConstellationView: View {
     @ObservedObject var viewModel: StarPointViewModel
     let scale: CGFloat
     let offset: CGSize
     @Binding var isTouchNearStar: Bool
+    
+    @Binding var isConnecting: Bool
+    @State private var draggingStarID: UUID? = nil
+    @State private var selectedStar: StarPoint? = nil
+    @State private var isShowingStarDetail = false
+    @State private var connectedStars: [StarPoint] = []
+    @State private var currentDragPosition: CGPoint? = nil
+    @State private var liveConnections: [(from: StarPoint, to: StarPoint)] = []
+    @State private var tempPositions: [UUID: CGPoint] = [:]
 
-    // ⭐️ 외부에서 별 탭 처리할 수 있도록 콜백 추가
     var onStarTap: (StarPoint) -> Void = { _ in }
 
     var body: some View {
         ZStack {
-            // 🌌 별자리 연결선
+            // 저장된 연결선
             ForEach(viewModel.connections) { connection in
                 if let from = viewModel.stars.first(where: { $0.id == connection.fromStarID }),
                    let to = viewModel.stars.first(where: { $0.id == connection.toStarID }) {
-                    let fromPos = from.position.applying(scale: scale, offset: offset)
-                    let toPos = to.position.applying(scale: scale, offset: offset)
+
+                    let fromRaw = tempPositions[connection.fromStarID] ?? from.position
+                    let toRaw = tempPositions[connection.toStarID] ?? to.position
+
+                    let fromPos = fromRaw.applying(scale: scale, offset: offset)
+                    let toPos = toRaw.applying(scale: scale, offset: offset)
 
                     Path { path in
                         path.move(to: fromPos)
                         path.addLine(to: toPos)
                     }
-                    .stroke(Color.white.opacity(0.4), lineWidth: 1.5)
+                    .stroke(Color.white.opacity(0.5), lineWidth: 1.5)
                 }
             }
 
-            // ⭐️ 별
+            // 드래그 중 라이브 연결선
+            ForEach(liveConnections, id: \.from.id) { pair in
+                let fromPos = pair.from.position.applying(scale: scale, offset: offset)
+                let toPos = pair.to.position.applying(scale: scale, offset: offset)
+
+                Path { path in
+                    path.move(to: fromPos)
+                    path.addLine(to: toPos)
+                }
+                .stroke(Color.cyan, lineWidth: 2)
+            }
+
+            // 별 렌더링
             ForEach(viewModel.stars) { star in
                 let position = star.position.applying(scale: scale, offset: offset)
 
@@ -46,27 +72,79 @@ struct ConstellationView: View {
                     position: position,
                     scale: scale,
                     onTap: {
-                        onStarTap(star) // ✅ 외부로 전달
+                        onStarTap(star)
                     },
                     onMove: { newPos in
-                        // 별 이동 처리: 우주 좌표로 환산 후 업데이트
+                        // 화면 좌표 → 우주 좌표 변환 후 저장
                         let spaceX = (newPos.x - offset.width) / scale
                         let spaceY = (newPos.y - offset.height) / scale
                         viewModel.updatePosition(for: star, to: CGPoint(x: spaceX, y: spaceY))
                     },
-                    onDragChanged: { _ in },
-                    isConnectModeEnabled: false
+                    onDragChanged: { dragPos in
+                        // 🟡 기존 dragPos는 화면 좌표임 → 우주 좌표로 변환해서 저장
+                        let spacePos = CGPoint(
+                            x: (dragPos.x - offset.width) / scale,
+                            y: (dragPos.y - offset.height) / scale
+                        )
+                        tempPositions[star.id] = spacePos
+                        draggingStarID = star.id
+                    },
+                    isConnectModeEnabled: isConnecting
                 )
             }
-        }
-    }
 
-    // 🔍 주변 별 감지 (별 근처에서 제스처 작동 판단용)
-    func checkIfNearStar(_ screenLocation: CGPoint) -> Bool {
-        viewModel.stars.contains { star in
-            let screenPos = star.position.applying(scale: scale, offset: offset)
-            let distance = hypot(screenLocation.x - screenPos.x, screenLocation.y - screenPos.y)
-            return distance < 30
+            // 현재 드래그 중 선
+            if isConnecting,
+               let start = connectedStars.last,
+               let drag = currentDragPosition {
+                let startPos = start.position.applying(scale: scale, offset: offset)
+
+                Path { path in
+                    path.move(to: startPos)
+                    path.addLine(to: drag)
+                }
+                .stroke(Color.cyan, lineWidth: 2)
+            }
         }
+
+        .highPriorityGesture(
+            isConnecting ?
+            DragGesture()
+                .onChanged { value in
+                    currentDragPosition = value.location
+                    if connectedStars.isEmpty,
+                       let first = viewModel.findStar(near: value.location, scale: scale, offset: offset) {
+                        connectedStars.append(first)
+                        return
+                    }
+
+                    if let star = viewModel.findStar(near: value.location, scale: scale, offset: offset),
+                       let last = connectedStars.last,
+                       star.id != last.id,
+                       (star.id == connectedStars.first?.id ||
+                        !connectedStars.contains(where: { $0.id == star.id })) {
+                        connectedStars.append(star)
+                        liveConnections.append((from: last, to: star))
+                        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+                    }
+                }
+                .onEnded { _ in
+                    let existingConstellationID = connectedStars.compactMap { $0.constellationID }.first
+                    let constellationID = existingConstellationID ?? UUID()
+
+                    for pair in liveConnections {
+                        viewModel.connectStars(start: pair.from, end: pair.to, constellationID: constellationID)
+                    }
+                    for star in connectedStars {
+                        star.constellationID = constellationID
+                    }
+                    try? viewModel.modelContext.save()
+
+                    connectedStars = []
+                    liveConnections = []
+                    currentDragPosition = nil
+                }
+            : nil
+        )
     }
 }
