@@ -46,10 +46,10 @@ class StarPointViewModel: ObservableObject {
     }
     
     // 특정 위치에 별 추가하는 함수
-    func addStar(at screenPosition: CGPoint, scale: CGFloat, offset: CGSize) {
+    func addStar(at screenPosition: CGPoint, scale: CGFloat, offset: CGSize, title: String, content: String) {
         let spacePosition = convertToSpaceCoordinates(screenPos: screenPosition, scale: scale, offset: offset)
 
-        let newStar = StarPoint(position: spacePosition)
+        let newStar = StarPoint(position: spacePosition, title: title, content: content)
         modelContext.insert(newStar)
         try? modelContext.save()
         stars.append(newStar)
@@ -59,13 +59,13 @@ class StarPointViewModel: ObservableObject {
     
     
     // 랜덤한 자리에 별 생성
-    func addRandomStar(in size: CGSize, scale: CGFloat, offset: CGSize) {
+    func addRandomStar(in size: CGSize, scale: CGFloat, offset: CGSize, title: String, content: String) {
         let padding: CGFloat = 50
         let randomX = CGFloat.random(in: padding...(size.width - padding))
         let randomY = CGFloat.random(in: padding...(size.height - padding))
         let screenPosition = CGPoint(x: randomX, y: randomY)
 
-        addStar(at: screenPosition, scale: scale, offset: offset)
+        addStar(at: screenPosition, scale: scale, offset: offset, title: title, content: content)
     }
 
     
@@ -85,9 +85,10 @@ class StarPointViewModel: ObservableObject {
     }
     
     // 터치가 닿은 영역의 주변 별 찾기
-    func findStar(near position: CGPoint, threshold: CGFloat = 24) -> StarPoint? {
+    func findStar(near screenLocation: CGPoint, scale: CGFloat, offset: CGSize, threshold: CGFloat = 30) -> StarPoint? {
         stars.first {
-            hypot($0.position.x - position.x, $0.position.y - position.y) < threshold
+            let screenPos = $0.position.applying(scale: scale, offset: offset)
+            return hypot(screenLocation.x - screenPos.x, screenLocation.y - screenPos.y) < threshold
         }
     }
     

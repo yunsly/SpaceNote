@@ -5,12 +5,6 @@
 //  Created by yunsly on 6/18/25.
 //
 
-
-// ✅ GlowingStar.swift (리팩토링 버전)
-// - 별 하나의 제스처, 이동, 탭 처리 담당
-// - LongPress로 이동 모드 진입, Drag로 이동
-// - TapGesture는 별 선택용 (예: 시트 띄우기)
-
 import SwiftUI
 
 struct GlowingStar: View {
@@ -74,10 +68,12 @@ struct GlowingStar: View {
 
             // ⭐️ 롱프레스로 이동 모드 진입 + 햅틱 발생
             .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.3)
+                LongPressGesture()
                     .onEnded { _ in
-                        isDragging = true
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        if !isConnectModeEnabled {
+                            isDragging = true
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        }
                     }
             )
 

@@ -13,11 +13,10 @@ struct BottomButtonBarView: View {
 
     @Binding var scale: CGFloat
     @Binding var offset: CGSize
+    @Binding var isConnecting: Bool
   
     @State private var isRemove: Bool = true
     @State private var isExpanded: Bool = false
-    @State private var isEdit: Bool = false
-    
     @State private var title: String = ""
     @State private var content: String = ""
     @Namespace private var namespace
@@ -70,7 +69,9 @@ struct BottomButtonBarView: View {
                             .glassEffectID("0", in: namespace)
                             
                             Button(action: {
-                                viewModel.addRandomStar(in: geometry.size, scale: scale, offset: offset)
+                                viewModel.addRandomStar(in: geometry.size, scale: scale, offset: offset, title: title, content: content)
+                                title = ""
+                                content = ""
                                 withAnimation {
                                     isExpanded.toggle()
                                     isRemove = true
@@ -89,12 +90,12 @@ struct BottomButtonBarView: View {
                     }
                     HStack {
                         
-                        if isEdit {
+                        if isConnecting {
                             //확인 버튼
                             Button(action: {
                                 selectedTab = 0
                                 withAnimation {
-                                    isEdit = false
+                                    isConnecting = false
                                     isRemove = true
                                 }
                             }) {
@@ -107,9 +108,7 @@ struct BottomButtonBarView: View {
                             .glassEffectID("plusButton", in: plusButtonNamespace)
                             .glassEffectUnion(id: "0", namespace: namespace)
 
-                        }
-                        
-                        if isRemove {
+                        } else if isRemove {
                             //리스트 버튼
                             Button(action: {
                             }) {
@@ -129,7 +128,7 @@ struct BottomButtonBarView: View {
                             Button(action: {
                                 selectedTab = 1
                                 withAnimation {
-                                    isEdit = true
+                                    isConnecting = true
                                     isRemove = false
                                 }
                             }) {

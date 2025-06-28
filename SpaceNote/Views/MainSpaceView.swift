@@ -41,6 +41,7 @@ struct MainSpaceView: View {
                         viewModel: viewModel,
                         scale: $scale,
                         offset: $offset,
+                        isConnecting: $isConnecting,
                         onStarTap: { star in
                             selectedStar = star
                             isShowingStarDetail = true
@@ -52,7 +53,8 @@ struct MainSpaceView: View {
                             viewModel: viewModel,
                             selectedTab: $selectedTab, // ✅ 연결 모드 전환용 바인딩
                             scale: $scale,
-                            offset: $offset
+                            offset: $offset,
+                            isConnecting: $isConnecting
                         )
                     }
 
@@ -70,55 +72,16 @@ struct MainSpaceView: View {
                         isConnecting = false
                     }
                 }
-                .gesture(
-                    isConnecting ?
-                    DragGesture()
-                        .onChanged { value in
-                            currentDragPosition = value.location
-                            if connectedStars.isEmpty,
-                               let first = viewModel.findStar(near: value.location) {
-                                connectedStars.append(first)
-                                return
-                            }
-
-                            if let star = viewModel.findStar(near: value.location),
-                               let last = connectedStars.last,
-                               star.id != last.id,
-                               (star.id == connectedStars.first?.id ||
-                                !connectedStars.contains(where: { $0.id == star.id })) {
-                                connectedStars.append(star)
-                                liveConnections.append((from: last, to: star))
-                                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-                            }
-                        }
-                        .onEnded { _ in
-                            let existingConstellationID = connectedStars.compactMap { $0.constellationID }.first
-                            let constellationID = existingConstellationID ?? UUID()
-
-                            for pair in liveConnections {
-                                viewModel.connectStars(
-                                    start: pair.from,
-                                    end: pair.to,
-                                    constellationID: constellationID
-                                )
-                            }
-                            for star in connectedStars {
-                                star.constellationID = constellationID
-                            }
-                            try? viewModel.modelContext.save()                 
-                            // 상태 초기화
-                            connectedStars = []
-                            liveConnections = []
-                            currentDragPosition = nil
-//                          isConnecting = false
-//                          selectedTab = 0
-                        }
-                    : nil
-                )
                 .sheet(isPresented: $isShowingStarDetail) {
                     if let selected = selectedStar { 
                         VStack {
-                            Text("⭐️").font(.title2).padding()
+                            Text(selected.title)
+                                .font(.title2)
+                                .padding()
+                            Text(selected.content)
+                                .font(.title3)
+                                .padding()
+                            
                             Text("Star ID: \(selected.id.uuidString)").font(.caption).foregroundColor(.gray)
                             if let constellation = selected.constellationID {
                                 Text("Constellation ID: \(constellation.uuidString)").font(.caption).foregroundColor(.gray)
